@@ -53,3 +53,28 @@ body {
   background-color: black;
   font-size: 10px;
 }
+
+/* colors */
+.c_yellow {
+    color: yellow;
+}
+
+.bg_yellow {
+    background-color: yellow;
+}
+
+.c_black {
+    color: black;
+}
+
+.bg_black {
+    background-color: black;
+}
+
+.c_white {
+    color: white;
+}
+
+.bg_white {
+    background-color: white;
+}

@@ -1,23 +1,20 @@
 defmodule RoguelixirWeb.GameLive do
   use RoguelixirWeb, :live_view
 
-  @max_width 79
-  @max_height 49
+  alias Roguelixir
+
   def mount(_params, _session, socket) do
-    player = {12, 12}
-    {:ok, assign(socket, logs: [], grid: generate_grid(player), player: player)}
+    game = Roguelixir.new_game()
+    {:ok, assign(socket, logs: [], grid: generate_grid(game), game: game, player: game.player)}
   end
 
   def render(assigns) do
     ~H"""
-    <div class="container" phx-window-keyup="key_up">
+    <div class="container" phx-window-keydown="key_pressed" phx-throttle="50">
       <div class="grid">
-        <%= for {row, row_idx} <- Enum.with_index(@grid), {cell, cell_idx} <- Enum.with_index(row) do %>
-          <div
-            class={"cell #{if {row_idx, cell_idx} == @player, do: "player", else: ""}"}
-            id={"cell-#{row_idx}-#{cell_idx}"}
-          >
-            <%= cell %>
+        <%= for {{y, x}, char, c, bg} <- @grid do %>
+          <div class={"cell #{c} #{bg}"} id={"cell-#{y}-#{x}"}>
+            <%= char %>
           </div>
         <% end %>
       </div>
@@ -33,32 +30,45 @@ defmodule RoguelixirWeb.GameLive do
     """
   end
 
-  def handle_event("key_up", %{"key" => key}, socket) do
-    {y, x} = socket.assigns.player
+  def handle_event("key_pressed", %{"key" => key}, socket) do
+    game = socket.assigns.game
 
-    new_player =
+    new_game =
       case key do
-        "ArrowUp" -> {max(y - 1, 0), x}
-        "ArrowDown" -> {min(y + 1, @max_height), x}
-        "ArrowLeft" -> {y, max(x - 1, 0)}
-        "ArrowRight" -> {y, min(x + 1, @max_width)}
+        "ArrowUp" -> Roguelixir.move_player(game, :up)
+        "ArrowDown" -> Roguelixir.move_player(game, :down)
+        "ArrowLeft" -> Roguelixir.move_player(game, :left)
+        "ArrowRight" -> Roguelixir.move_player(game, :right)
+        _ -> game
       end
 
-    {:noreply, assign(socket, grid: generate_grid(new_player), player: new_player)}
+    {:noreply,
+     assign(socket, grid: generate_grid(new_game), game: new_game, player: new_game.player)}
   end
 
-  defp generate_grid(player) do
-    for y <- 0..@max_height do
-      for x <- 0..@max_width do
-        case {y, x} do
-          ^player -> "@"
-          {0, _} -> "#"
-          {_, 0} -> "#"
-          {@max_height, _} -> "#"
-          {_, @max_width} -> "#"
-          _ -> "."
-        end
-      end
+  defp generate_grid(game) do
+    game.grid
+    |> Enum.sort()
+    |> Enum.map(&to_cell_tuple/1)
+  end
+
+  defp to_cell_tuple({pos, glyph}) do
+    {pos, glyph.char, to_css_color(glyph.color), to_css_bg_color(glyph.bg_color)}
+  end
+
+  defp to_css_color(color) do
+    "c_#{hex_color(color)}"
+  end
+
+  defp to_css_bg_color(color) do
+    "bg_#{hex_color(color)}"
+  end
+
+  defp hex_color(hex) do
+    case hex do
+      "FFFFFF" -> "white"
+      "#000000" -> "black"
+      "#FFFF00" -> "yellow"
     end
   end
 end
