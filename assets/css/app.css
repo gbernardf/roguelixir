@@ -22,8 +22,8 @@ body {
 .grid {
   flex: 1;
   display: grid;
-  grid-template-columns: repeat(32, 1fr);
-  grid-template-rows: repeat(24, 1fr);
+  grid-template-columns: repeat(80, 1fr);
+  grid-template-rows: repeat(50, 1fr);
   border: 1px solid #000;
   background-color: black;
 }
@@ -35,7 +35,7 @@ body {
   padding: 0; /* Adjust padding if needed */
   line-height: 1; /* Adjust line-height if needed */
   font-family: monospace;
-  font-size: 20px; /* Adjust font-size if needed */
+  font-size: 10px; /* Adjust font-size if needed */
   color: white;
 }
 
@@ -51,5 +51,5 @@ body {
   color: #f0f0f0;
   font-family: monospace;
   background-color: black;
-  font-size: 18px;
+  font-size: 10px;
 }
