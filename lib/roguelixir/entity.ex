@@ -1,15 +1,34 @@
 defmodule Roguelixir.Entity do
-  defstruct [:pos, :glyph]
+  use Agent
+
+  defstruct [:id, :pos, :glyph, :block_view]
 
   alias Roguelixir.Glyph
+  alias Roguelixir.Referene
+
+  def start_link(_opts) do
+    Agent.start_link(fn -> %{} end, name: __MODULE__)
+  end
+
+  def get(reference) do
+    Agent.get(__MODULE__, &Map.get(&1, reference))
+  end
 
   def new(
         {_y, _x} = position,
         %Glyph{} = glyph
       ) do
-    %__MODULE__{
+    reference = Referene.new()
+
+    e = %__MODULE__{
+      id: reference,
       pos: position,
-      glyph: glyph
+      glyph: glyph,
+      block_view: false
     }
+
+    Agent.update(__MODULE__, &Map.put(&1, reference, e))
+
+    e
   end
 end
