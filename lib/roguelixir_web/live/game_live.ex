@@ -3,9 +3,17 @@ defmodule RoguelixirWeb.GameLive do
 
   alias Roguelixir
 
+  @move_keys [
+    "ArrowUp",
+    "ArrowDown",
+    "ArrowLeft",
+    "ArrowRight"
+  ]
+
   def mount(_params, _session, socket) do
-    game = Roguelixir.new_game()
-    {:ok, assign(socket, logs: [], grid: generate_grid(game), game: game, player: game.player)}
+    {game_id, grid} = Roguelixir.new_game()
+
+    {:ok, assign(socket, logs: [], grid: generate_grid(grid), game_id: game_id)}
   end
 
   def render(assigns) do
@@ -30,24 +38,26 @@ defmodule RoguelixirWeb.GameLive do
     """
   end
 
-  def handle_event("key_pressed", %{"key" => key}, socket) do
-    game = socket.assigns.game
-
-    new_game =
+  def handle_event("key_pressed", %{"key" => key}, socket) when key in @move_keys do
+    direction =
       case key do
-        "ArrowUp" -> Roguelixir.move_player(game, :up)
-        "ArrowDown" -> Roguelixir.move_player(game, :down)
-        "ArrowLeft" -> Roguelixir.move_player(game, :left)
-        "ArrowRight" -> Roguelixir.move_player(game, :right)
-        _ -> game
+        "ArrowUp" -> :up
+        "ArrowDown" -> :down
+        "ArrowLeft" -> :left
+        "ArrowRight" -> :right
       end
 
-    {:noreply,
-     assign(socket, grid: generate_grid(new_game), game: new_game, player: new_game.player)}
+    new_grid = Roguelixir.move_player(socket.assigns.game_id, direction)
+
+    {:noreply, assign(socket, grid: generate_grid(new_grid))}
   end
 
-  defp generate_grid(game) do
-    game.grid
+  def handle_event("key_pressed", _, socket) do
+    {:noreply, socket}
+  end
+
+  defp generate_grid(grid) do
+    grid
     |> Enum.sort()
     |> Enum.map(&to_cell_tuple/1)
   end
