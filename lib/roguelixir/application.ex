@@ -17,7 +17,8 @@ defmodule Roguelixir.Application do
       # Start a worker by calling: Roguelixir.Worker.start_link(arg)
       # {Roguelixir.Worker, arg},
       # Start to serve requests, typically the last entry
-      RoguelixirWeb.Endpoint
+      RoguelixirWeb.Endpoint,
+      Roguelixir.Entity
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
